@@ -5,7 +5,7 @@ export default function resetSetItem(key, newVal) {
         const storage = {
             setItem: function (k, val) {
                 localStorage.setItem(k, val);
-                // 初始化创建的事件
+                // 初始化创建的事件,页面被改变
                 newStorageEvent.initStorageEvent('setItem', false, false, k, null, val, null, null);
                 // 派发对象
                 window.dispatchEvent(newStorageEvent)

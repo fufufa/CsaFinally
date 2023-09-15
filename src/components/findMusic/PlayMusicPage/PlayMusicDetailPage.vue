@@ -18,7 +18,7 @@
                     <span style="color: #4d99de;cursor: pointer" @click="toSingerPage(music.ar[0].id)">{{music.ar[0].name}}</span>
                 </span>
                 <!--歌词-->
-                <div style="width: 350px;height: 350px;overflow: hidden;margin-top: 25px;">
+                <div style="width: 450px;height: 350px;overflow: hidden;margin-top: 25px;">
                     <div style="overflow-y: auto">
                         <ul ref="lyric">
                             <li v-for="(item, i) in lrcObject"
@@ -31,7 +31,6 @@
 
             </el-col>
         </el-row>
-
         <!--底部评论信息-->
         <el-main style="margin-top: 25px;margin-bottom: 75px;">
             <el-row>
@@ -105,14 +104,13 @@
                 </el-col>
             </el-row>
         </el-main>
-
     </div>
 </template>
 
 <script>
     export default {
         data() {
-            return {
+            return { 
                 curId: this.$route.params.id,
                 //当前音乐的详细信息
                 music: {
@@ -164,13 +162,13 @@
                 for (let i = 0; i < this.lrcObject.length; i++) {
                     //这里使用小于符号判断是为了 保证回退音乐进度事件的效果实现性
                     if (newVal <= parseFloat(this.lrcObject[i].t)) {
-                        if (this.lyricIndex === i - 1) {
+                        if (this.lyricIndex === i) {
                             break
                         }
                         //找到比当前时间点 大一点的后一位的歌词的索引值
                         this.lyricIndex = i - 1;
                         //当前距离上方的距离  控制歌词上下滚动
-                        var currentTemp = this.$refs.lyric.style.marginTop
+                        let currentTemp = this.$refs.lyric.style.marginTop
                         currentTemp = currentTemp.substr(0, currentTemp.length - 2)
                         //滚动距离
                         currentTemp = parseInt(currentTemp)
@@ -190,10 +188,13 @@
                             //设置样式
                             this.$refs.lyric.style.marginTop = currentTemp + 'px'
                         }
+                        
+
                         //如果当前是最后一句歌词 代表歌曲要放送结束了 将我们的lyricIndex(当前歌词索引值还原成0便于下一曲使用)
                         if (this.lyricIndex === this.lrcObject.length - 1) {
                             this.lyricIndex = 0;
                         }
+                        
                         break;
                     }
                 }
@@ -215,6 +216,7 @@
             }
         },
         created() {
+
             //获取音乐的详细信息
             this.getMusicDetail(this.$route.params.id)
             //获取歌曲的歌词
@@ -239,6 +241,7 @@
                 }, 30)
             }
         },
+        //在路由转换之前消除定时器，也可以在beforedestroy生命周期钩子中销毁
         beforeRouteLeave(to, form, next) {
             window.clearInterval(this.rotate)
             this.rotate = null
@@ -262,32 +265,32 @@
             },
             //解析歌词
             createLrcObj(lrc) {
-                var oLRC = {
+                let oLRC = {
                     ms: [] //歌词数组{t:时间,c:歌词}
                 };
                 if (lrc.length == 0) return;
-                var lrcs = lrc.split('\n');//用回车拆分成数组
-                for (var i in lrcs) {//遍历歌词数组
+                let lrcs = lrc.split('\n');//用回车拆分成数组
+                for (let i in lrcs) {//遍历歌词数组
                     lrcs[i] = lrcs[i].replace(/(^\s*)|(\s*$)/g, ""); //去除前后空格
-                    var t = lrcs[i].substring(lrcs[i].indexOf("[") + 1, lrcs[i].indexOf("]"));//取[]间的内容
-                    var s = t.split(":");//分离:前后文字
+                    let t = lrcs[i].substring(lrcs[i].indexOf("[") + 1, lrcs[i].indexOf("]"));//取[]间的内容
+                    let s = t.split(":");//分离:前后文字
                     if (isNaN(parseInt(s[0]))) { //不是数值
-                        for (var i in oLRC) {
+                        for (let i in oLRC) {
                             if (i != "ms" && i == s[0].toLowerCase()) {
                                 oLRC[i] = s[1];
                             }
                         }
                     } else { //是数值
-                        var arr = lrcs[i].match(/\[(\d+:.+?)\]/g);//提取时间字段，可能有多个
-                        var start = 0;
-                        for (var k in arr) {
+                        let arr = lrcs[i].match(/\[(\d+:.+?)\]/g);//提取时间字段，可能有多个
+                        let start = 0;
+                        for (let k in arr) {
                             start += arr[k].length; //计算歌词位置
                         }
-                        var content = lrcs[i].substring(start);//获取歌词内容
-                        for (var k in arr) {
-                            var t = arr[k].substring(1, arr[k].length - 1);//取[]间的内容
-                            // var t = arr[k]
-                            var s = t.split(":");//分离:前后文字
+                        let content = lrcs[i].substring(start);//获取歌词内容
+                        for (let k in arr) {
+                            let t = arr[k].substring(1, arr[k].length - 1);//取[]间的内容
+                            // let t = arr[k]
+                            let s = t.split(":");//分离:前后文字
                             oLRC.ms.push({//对象{t:时间,c:歌词}加入ms数组
                                 // t: t,
                                 t: (parseFloat(s[0]) * 60 + parseFloat(s[1])).toFixed(3),
@@ -299,7 +302,7 @@
                 oLRC.ms.sort(function (a, b) {//按时间顺序排序
                     return a.t - b.t;
                 });
-                // for(var i in oLRC){ //查看解析结果
+                // for(let i in oLRC){ //查看解析结果
                 //     console.log(i,":",oLRC[i]);
                 // }
                 this.lrcObject = oLRC.ms
@@ -334,7 +337,6 @@
         left: 13%;
         z-index: -1;
     }
-
     .topInfo {
         height: 600px;
     }
@@ -343,6 +345,5 @@
         list-style: none;
         margin-top: 15px;
     }
-
 
 </style>

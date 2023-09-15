@@ -173,7 +173,7 @@
             title="使用网易云官方注册的账号登录"
             :visible.sync="loginDialogVisible"
             width="30%" 
-            @close="handleLoginDialogClosed">
+            >
             <div>
                 <img v-if="isCount" src="imgs/phone.png" style="display: block;margin: 0 auto" alt="">
                 <el-form 
@@ -387,6 +387,7 @@
                     this.musicUrl = res.data.data[0].url
                     //设置当前歌的详细信息
                     this.$http.get('song/detail', {params: {ids: curId}}).then(res => {
+                        console.log(res,"歌详情");
                         this.music = res.data.songs[0]
                     })
                     //设置当前播放音乐的id
@@ -470,13 +471,16 @@
             //获取二维码
             async initqrc(){
                 this.isCount = false
+                //获取二维码的秘钥
                 const keyRes = await this.$http.get('/login/qr/key')
                 this.qrc.key = keyRes.data.data.unikey
+                //获取到二维码图片
                 const qRes = await this.$http.get(`/login/qr/create?key=${this.qrc.key}&qrimg=${true}`)
                 this.qrc.qrcImg = qRes.data.data.qrimg
-                const statuRes = await this.$http.get(`/login/qr/check?key=${this.qrc.key}`)
-                console.log(statuRes);
-                if(statuRes.data.data.code === 803){
+                //获取到二维码的状态
+                let statuRes = await this.$http.get(`/login/qr/check?key=${this.qrc.key}`)
+                const situation = statuRes.data.code
+                if(situation === 803){
                     //保存cookie的信息
                     window.localStorage.setItem('musicCookie', res.data.cookie)
                     //保存用户信息,退出时删除
@@ -487,10 +491,6 @@
                     this.loginDialogVisible = false
                 }
                 
-            },
-            //重设登录框的表单信息
-            handleLoginDialogClosed() {
-                this.$refs.loginInfoRuleForm.resetFields();
             },
             //退出登录
             logout() {
@@ -648,5 +648,6 @@
 
     /deep/ .el-dialog__title {
         float: left;
+        
     }
 </style>
